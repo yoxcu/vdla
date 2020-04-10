@@ -1,0 +1,123 @@
+#full{
+  position:absolute;
+  left:0px;
+  top:0px;
+  right:0px;
+  bottom:0px;
+}
+.centered {
+  /* background: black;
+  color: white; */
+  border-radius: 1em;
+  padding: 1em;
+  position: absolute;
+  top: 20%;
+  left: 50%;
+  margin-right: -50%;
+  transform: translate(-50%);
+  max-width: 90%;
+  word-wrap: break-word;
+  text-align: center;
+}
+#content_sec {
+  /* background: black;
+  color: white; */
+  word-wrap: break-word;
+  text-align: center;
+  height: 100%;
+  width: 100%;
+}
+#mapid {
+   height: 50%;
+}
+#chart_container{
+   height: 50%;
+   width: 100%;
+   display: inline-block;
+   margin: auto;
+}
+#chart {
+   height: 100%;
+   width: 100%;
+}
+.loader {
+  border: 16px solid #f3f3f3; /* Light grey */
+  border-top: 16px solid #3498db; /* Blue */
+  border-radius: 50%;
+  width: 120px;
+  height: 120px;
+  animation: spin 2s linear infinite;
+  margin: auto;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.menu_container {
+ position: fixed;
+ right: 0;
+ z-index: 9999;
+}
+
+#menu_list_container {
+  visibility: hidden;
+  margin-top: 40px;
+}
+
+#menu_list {
+  list-style-type: none;
+  padding:0;
+  text-align: left;
+  background:white;
+}
+
+#settings_list{
+  height: 100px;
+  display: flex;
+  flex-direction: column;
+  flex-wrap: wrap;
+}
+
+#uplot_creds{
+  font-size: 11px;
+  position: absolute;
+  bottom: 0;
+  right: 0;
+}
+
+.menu_icon_container {
+  cursor: pointer;
+  float: right;
+}
+
+.bar1, .bar2, .bar3 {
+ width: 35px;
+ height: 5px;
+ background-color: #333;
+ margin: 6px 0;
+ transition: 0.4s;
+}
+
+/* Rotate first bar */
+.change .bar1 {
+ -webkit-transform: rotate(-45deg) translate(-9px, 6px) ;
+ transform: rotate(-45deg) translate(-9px, 6px) ;
+}
+
+/* Fade out the second bar */
+.change .bar2 {
+ opacity: 0;
+}
+
+/* Rotate last bar */
+.change .bar3 {
+ -webkit-transform: rotate(45deg) translate(-8px, -8px) ;
+ transform: rotate(45deg) translate(-8px, -8px) ;
+}
+
+.uplot .legend.inline{
+  display: block;
+  max-width: 90vw;
+}

@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html>
+<head>
+
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <link rel="stylesheet" href="uPlot/dist/uPlot.min.css">
+  <script src="uPlot/dist/uPlot.iife.js"></script>
+
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.6.0/dist/leaflet.css"
+  integrity="sha512-xwE/Az9zrjBIphAcBb3F6JVqxf46+CDLwfLMHloNu6KEQCAWi6HcDUbeOfBIptF7tcCzusKFjFw2yuvEpDL9wQ=="
+  crossorigin=""/>
+  <script src="https://unpkg.com/leaflet@1.6.0/dist/leaflet.js"
+  integrity="sha512-gZwIG9x3wUXg2hdXF6+rVkLF/0Vi9U8D2Ntg4Ga5I5BZpVkVxlJWbSQtXPSiUTtC0TjtGOmxa1AJPuV0CPthew=="
+  crossorigin=""></script>
+
+  <link rel="stylesheet" type="text/css" href="vdla.css">
+
+</head>
+
+<body>
+  <div id="full">
+
+    <section id="upload_sec" class="centered" style="visibility : hidden;">
+      <h1>Vesc Data Log Analyzer</h1><br>
+      <input type="file" id="files" name="files[]" multiple />
+    </section>
+
+    <section id="loader_sec" class="centered" style="visibility : visible;">
+       <div class="loader"></div>
+    </section>
+
+    <section id="content_sec" style="visibility: hidden;">
+      <div class="menu_container">
+        <div class="menu_icon_container" onclick="menu_click(this)">
+         <div class="bar1"></div>
+         <div class="bar2"></div>
+         <div class="bar3"></div>
+        </div>
+        <div id="menu_list_container">
+          <ul id="menu_list"></ul>
+        </div>
+      </div>
+      <div id="mapid"></div>
+      <div id="chart_container">
+        <div id="chart" class="chartclass"></div>
+        <span id="uplot_creds"><a href="https://github.com/leeoniya/uPlot" title="A small fast chart for time series, lines, areas, ohlc & bars">uPlot</a></span>
+      </div>
+      <output id="file_list"></output>
+      <output id="settings_list"></output>
+      <output id="file_content"></output>
+    </section>
+  </div>
+</body>
+
+<script type="text/javascript" src="vdla.js"></script>
+
+</html>
