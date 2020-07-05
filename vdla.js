@@ -153,6 +153,14 @@ function touchZoomPlugin(opts) {
 }
 
 //utils
+
+function compare_filetimes(a, b) {
+  if (a.time > b.time) return 1;
+  if (b.time > a.time) return -1;
+
+  return 0;
+}
+
 function getAllIndexes(arr, val) {
     var indexes = [], i;
     for(i = 0; i < arr.length; i++)
@@ -302,7 +310,6 @@ function create_map(){
       zoomOffset: -1,
       accessToken: 'pk.eyJ1IjoieW94Y3UiLCJhIjoiY2s4c21scW8yMDB6MzNkbndlYXpraTEwdSJ9.VGfekLj7rTAtlifcuD4Buw'
   }).addTo(map);
-
   var polyline = L.polyline(latlngs, {color: 'red'}).addTo(map);
   // zoom the map to the polyline
   map.fitBounds(polyline.getBounds());
@@ -482,85 +489,115 @@ function create_chart(){
 function parse_LogFile(txt){
   var lines = txt.split("\n");
   for (var i in lines){
-    var line = lines[i];
-    if (i==0){
-      var settings = line.substr(2).split(",");
-      for (var j in settings){
-        var li=document.createElement('li');
-        document.getElementById('settings_list').appendChild(li);
-        var setting = settings[j].split("=")
-        li.innerHTML=['<strong>', setting[0], '=</strong>',setting[1]].join("");
+    if (lines[i]!=""){
+      if (Times.length == 0){
+        if (i==0){
+          var settings = lines[i].substr(2).split(",");
+          for (var j in settings){
+            var li=document.createElement('li');
+            document.getElementById('settings_list').appendChild(li);
+            var setting = settings[j].split("=")
+            li.innerHTML=['<strong>', setting[0], '=</strong>',setting[1]].join("");
+          }
+        } else if (i == 1){
+          names=lines[i].split(",")
+          //sort out time,faults,elapsedTime,lat,long
+          names.splice(13,4);
+          names.splice(0,1);
+        }
       }
-    } else if (i == 1){
-      names=line.split(",")
-      //sort out time,faults,elapsedTime,lat,long
-      names.splice(13,4);
-      names.splice(0,1);
-    } else if (i>1){
-      var values = line.split(",")
-      //DD_MM_YY_HH_MM_SS.sss
-      var ts=values[0].split("_")
-      values=values.map((item)=>{
-        return Number(item);
-      })
-      values[0]=(new Date([ts[2],"-",ts[1],"-",ts[0],"T",ts[3],":",ts[4],":",ts[5],"Z"].join(""))).getTime()/1000;
-      Times.push(values[0]);
-      TempPcbs.push(values[1]);
-      MotorCurrents.push(values[2]);
-      BatteryCurrents.push(values[3]);
-      DutyCycles.push(values[4]);
-      Speeds.push(values[5]);
-      InpVoltages.push(values[6]);
-      AmpHours.push(values[7]);
-      AmpHoursCharged.push(values[8]);
-      WattHours.push(values[9]);
-      WattHoursCharged.push(values[10]);
-      Distances.push(values[11]);
-      Powers.push(values[12]);
-      Faults.push(values[13]);
-      TimePassedInMss.push(values[14]);
-      latlngs.push([values[15],values[16]]);
-      Altitudes.push(values[17]);
-      GPSSpeeds.push(values[18]);
+      if (i>1){
+        var values = lines[i].split(",")
+
+        //DD_MM_YY_HH_MM_SS.sss
+        var ts=values[0].split("_")
+        values=values.map((item)=>{
+          return Number(item);
+        })
+        values[0]=(new Date([ts[2],"-",ts[1],"-",ts[0],"T",ts[3],":",ts[4],":",ts[5],"Z"].join(""))).getTime()/1000;
+        if (values[15] != 0 && values[16] != 0){
+          Times.push(values[0]);
+          TempPcbs.push(values[1]);
+          MotorCurrents.push(values[2]);
+          BatteryCurrents.push(values[3]);
+          DutyCycles.push(values[4]);
+          Speeds.push(values[5]);
+          InpVoltages.push(values[6]);
+          AmpHours.push(values[7]);
+          AmpHoursCharged.push(values[8]);
+          WattHours.push(values[9]);
+          WattHoursCharged.push(values[10]);
+          Distances.push(values[11]);
+          Powers.push(values[12]);
+          Faults.push(values[13]);
+          TimePassedInMss.push(values[14]);
+          latlngs.push([values[15],values[16]]);
+          Altitudes.push(values[17]);
+          GPSSpeeds.push(values[18]);
+        }else{
+          console.log("found invalid data:\n"+lines[i])
+        }
+      }
     }
     //var span = document.createElement('span');
     //span.innerHTML = line;
     //document.getElementById('file_content').insertBefore(span, null);
     //document.getElementById('file_content').insertBefore(document.createElement("br"), null);
   }
-  data = [Times,TempPcbs,MotorCurrents,BatteryCurrents,DutyCycles,Speeds,InpVoltages,AmpHours,AmpHoursCharged,WattHours,WattHoursCharged,Distances,Powers,Altitudes,GPSSpeeds]
-  create_map();
-  create_chart();
-  fill_menu();
-  show_content();
 }
 
+function append_file_content(files_arr){
+  var done=true;
+  for (var i in files_arr){
+    if (files_arr[i].reader.readyState != 2){
+      console.log("not fin");
+      done=false;
+      break;
+    }
+  }
+  if (done){
+    files_arr.sort(compare_filetimes);
+    for (i in files_arr){
+      parse_LogFile(files_arr[i].reader.result)
+    }
+    data = [Times,TempPcbs,MotorCurrents,BatteryCurrents,DutyCycles,Speeds,InpVoltages,AmpHours,AmpHoursCharged,WattHours,WattHoursCharged,Distances,Powers,Altitudes,GPSSpeeds]
+    create_map();
+    create_chart();
+    fill_menu();
+    show_content();
+  }
+}
+
+var files;
 function handleFileSelect(evt) {
   show_loader();
-  var files = evt.target.files; // FileList object
-
+  files = evt.target.files; // FileList object
+  var files_arr=[]
   // files is a FileList of File objects. List some properties.
   var output = [];
   for (var i = 0, f; f = files[i]; i++) {
     output.push('<li><strong>', escape(f.name), '</strong> (', f.type || 'n/a', ') - ',
                 f.size, ' bytes', '</li>');
-                // Only process image files.
+              // Only process image files.
     if (!f.type.match('text.*')) {
       handleError("Error Selecting File: Not a text/csv File")
       continue;
     }
 
-    var reader = new FileReader();
 
+    var name_parts=f.name.split("_");
+    var time=(new Date([name_parts[0],"T",name_parts[1].replace(/-/g,":"),"Z"].join("")));
+
+    var reader = new FileReader();
     // Closure to capture the file information.
-    reader.onload = (function(theFile) {
-      return function(e) {
-        parse_LogFile(e.target.result);
+    reader.onload = function(e) {
+        append_file_content(files_arr); //todo append
+        //parse_LogFile(e.target.result);
       };
-    })(f);
 
     // Read in the image file as a data URL.
     reader.readAsText(f);
+    files_arr.push({time: time,reader: reader});
   }
   //document.getElementById('file_list').innerHTML = '<ul>' + output.join('') +'</ul>';
 }
