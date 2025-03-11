@@ -486,63 +486,131 @@ function create_chart() {
   uplot.setSize(get_window_size());
 }
 
-function parse_LogFile(txt) {
+function parse_LogFile(txt, time) {
   var lines = txt.split("\n");
-  for (var i in lines) {
-    if (lines[i] != "") {
-      if (Times.length == 0) {
-        if (i == 0) {
-          var settings = lines[i].substr(2).split(",");
-          for (var j in settings) {
-            var li = document.createElement('li');
-            document.getElementById('settings_list').appendChild(li);
-            var setting = settings[j].split("=")
-            li.innerHTML = ['<strong>', setting[0], '=</strong>', setting[1]].join("");
+  var values = lines[0].split(",");
+  if (values.length > 10) {
+    //old ackmaniac fw logs seperated by ,
+    for (var i in lines) {
+      if (lines[i] != "") {
+        if (Times.length == 0) {
+          if (i == 0) {
+            var settings = lines[i].substr(2).split(",");
+            for (var j in settings) {
+              var li = document.createElement('li');
+              document.getElementById('settings_list').appendChild(li);
+              var setting = settings[j].split("=")
+              li.innerHTML = ['<strong>', setting[0], '=</strong>', setting[1]].join("");
+            }
+          } else if (i == 1) {
+            names = lines[i].split(",")
+            //sort out time,faults,elapsedTime,lat,long
+            names.splice(13, 4);
+            names.splice(0, 1);
           }
-        } else if (i == 1) {
-          names = lines[i].split(",")
-          //sort out time,faults,elapsedTime,lat,long
-          names.splice(13, 4);
-          names.splice(0, 1);
         }
-      }
-      if (i > 1) {
-        var values = lines[i].split(",")
+        if (i > 1) {
+          var values = lines[i].split(",")
 
-        //DD_MM_YY_HH_MM_SS.sss
-        var ts = values[0].split("_")
-        values = values.map((item) => {
-          return Number(item);
-        })
-        values[0] = (new Date([ts[2], "-", ts[1], "-", ts[0], "T", ts[3], ":", ts[4], ":", ts[5], "Z"].join(""))).getTime() / 1000;
-        if (values[15] != 0 && values[16] != 0) {
-          Times.push(values[0]);
-          TempPcbs.push(values[1]);
-          MotorCurrents.push(values[2]);
-          BatteryCurrents.push(values[3]);
-          DutyCycles.push(values[4]);
-          Speeds.push(values[5]);
-          InpVoltages.push(values[6]);
-          AmpHours.push(values[7]);
-          AmpHoursCharged.push(values[8]);
-          WattHours.push(values[9]);
-          WattHoursCharged.push(values[10]);
-          Distances.push(values[11]);
-          Powers.push(values[12]);
-          Faults.push(values[13]);
-          TimePassedInMss.push(values[14]);
-          latlngs.push([values[15], values[16]]);
-          Altitudes.push(values[17]);
-          GPSSpeeds.push(values[18]);
-        } else {
-          console.log("found invalid data:\n" + lines[i])
+          //DD_MM_YY_HH_MM_SS.sss
+          var ts = values[0].split("_")
+          values = values.map((item) => {
+            return Number(item);
+          })
+          values[0] = (new Date([ts[2], "-", ts[1], "-", ts[0], "T", ts[3], ":", ts[4], ":", ts[5], "Z"].join(""))).getTime() / 1000;
+          if (values[15] != 0 && values[16] != 0) {
+            Times.push(values[0]);
+            TempPcbs.push(values[1]);
+            MotorCurrents.push(values[2]);
+            BatteryCurrents.push(values[3]);
+            DutyCycles.push(values[4]);
+            Speeds.push(values[5]);
+            InpVoltages.push(values[6]);
+            AmpHours.push(values[7]);
+            AmpHoursCharged.push(values[8]);
+            WattHours.push(values[9]);
+            WattHoursCharged.push(values[10]);
+            Distances.push(values[11]);
+            Powers.push(values[12]);
+            Faults.push(values[13]);
+            TimePassedInMss.push(values[14]);
+            latlngs.push([values[15], values[16]]);
+            Altitudes.push(values[17]);
+            GPSSpeeds.push(values[18]);
+          } else {
+            console.log("found invalid data:\n" + lines[i])
+          }
         }
       }
     }
-    //var span = document.createElement('span');
-    //span.innerHTML = line;
-    //document.getElementById('file_content').insertBefore(span, null);
-    //document.getElementById('file_content').insertBefore(document.createElement("br"), null);
+    return
+  }
+  values = lines[0].split(";");
+  if (values.length > 10) {
+    filetime = time.getTime()
+    starttime = 0
+    console.log(filetime, time)
+    names = [
+      "TempPcb",
+      "MotorCurrent",
+      "BatteryCurrent",
+      "DutyCycle",
+      "Speed",
+      "InpVoltage",
+      "AmpHours",
+      "AmpHoursCharged",
+      "WattHours",
+      "WattHoursCharged",
+      "Distance",
+      "Power",
+      "Altitude",
+      "GPSSpeed"
+    ]
+    for (var i in lines) {
+      values = lines[i].split(";");
+      //ms_today;input_voltage;temp_mos_max;temp_mos_1;temp_mos_2;temp_mos_3;temp_motor;current_motor;
+      //current_in;d_axis_current;q_axis_current;erpm;duty_cycle;amp_hours_used;amp_hours_charged;watt_hours_used;
+      //watt_hours_charged;tachometer;tachometer_abs;encoder_position;fault_code;vesc_id;d_axis_voltage;q_axis_voltage;
+      //ms_today_setup;amp_hours_setup;amp_hours_charged_setup;watt_hours_setup;watt_hours_charged_setup;battery_level;battery_wh_tot;current_in_setup;
+      //current_motor_setup;speed_meters_per_sec;tacho_meters;tacho_abs_meters;num_vescs;ms_today_imu;roll;pitch;
+      //yaw;accX;accY;accZ;gyroX;gyroY;gyroZ;gnss_posTime;
+      //gnss_lat;gnss_lon;gnss_alt;gnss_gVel;gnss_vVel;gnss_hAcc;gnss_vAcc;
+
+      if (lines[i] != "") {
+        if (i > 0) {
+          values = values.map((item) => {
+            return Number(item);
+          })
+          if (starttime == 0) {
+            starttime = values[0]
+          }
+          // console.log(values);
+
+          if (values[48] != 0 && values[49] != 0) {
+            Times.push((filetime + values[0] - starttime) / 1000);
+            InpVoltages.push(values[1]);
+            TempPcbs.push(values[2]);
+            MotorCurrents.push(values[7]);
+            BatteryCurrents.push(values[8]);
+            DutyCycles.push(values[12] * 100);
+            AmpHours.push(values[13]);
+            AmpHoursCharged.push(values[14]);
+            WattHours.push(values[15]);
+            WattHoursCharged.push(values[16]);
+            Speeds.push(values[33]);
+            Distances.push(values[34] / 1000);
+            Powers.push(0);
+            Faults.push(values[20]);
+            TimePassedInMss.push(0);
+            latlngs.push([values[48], values[49]]);
+            Altitudes.push(values[50]);
+            GPSSpeeds.push(values[51]);
+          } else {
+            console.log("found invalid data:\n" + lines[i])
+          }
+        }
+      }
+    }
   }
 }
 
@@ -558,7 +626,7 @@ function append_file_content(files_arr) {
   if (done) {
     files_arr.sort(compare_filetimes);
     for (i in files_arr) {
-      parse_LogFile(files_arr[i].reader.result)
+      parse_LogFile(files_arr[i].reader.result, files_arr[i].time)
     }
     data = [Times, TempPcbs, MotorCurrents, BatteryCurrents, DutyCycles, Speeds, InpVoltages, AmpHours, AmpHoursCharged, WattHours, WattHoursCharged, Distances, Powers, Altitudes, GPSSpeeds]
     create_map();
@@ -585,8 +653,8 @@ function handleFileSelect(evt) {
     }
 
 
-    var name_parts = f.name.split("_");
-    var time = (new Date([name_parts[0], "T", name_parts[1].replace(/-/g, ":"), "Z"].join("")));
+    var name_parts = f.name.split(".")[0].split("_");
+    var time = (new Date([name_parts[0], "T", name_parts[1].replace(/-/g, ":")].join("")));
 
     var reader = new FileReader();
     // Closure to capture the file information.
