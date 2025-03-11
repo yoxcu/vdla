@@ -655,7 +655,10 @@ function handleFileSelect(evt) {
 
     var name_parts = f.name.split(".")[0].split("_");
     var time = (new Date([name_parts[0], "T", name_parts[1].replace(/-/g, ":")].join("")));
-
+    if (isNaN(time.getDate())) {
+      time = new Date();
+    }
+    console.log(time)
     var reader = new FileReader();
     // Closure to capture the file information.
     reader.onload = function (e) {
