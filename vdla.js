@@ -329,7 +329,7 @@ function update_map_popup(indx) {
         content = content.concat([
           names[i],
           ": ",
-          data[parseInt(i) + 1][indx],
+          parseFloat(data[parseInt(i) + 1][indx]).toFixed(1),
           units[i],
           "<br>"
         ]);
@@ -599,7 +599,7 @@ function parse_LogFile(txt, time) {
             WattHoursCharged.push(values[16]);
             Speeds.push(values[33]);
             Distances.push(values[34] / 1000);
-            Powers.push(0);
+            Powers.push(values[1] * values[8]);
             Faults.push(values[20]);
             TimePassedInMss.push(0);
             latlngs.push([values[48], values[49]]);
